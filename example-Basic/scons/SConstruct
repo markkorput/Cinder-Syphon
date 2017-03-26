@@ -1,9 +1,0 @@
-env = Environment()
-
-env['APP_TARGET'] = 'Syphon-BasicApp'
-env['APP_SOURCES'] = ['Syphon-BasicApp.cpp']
-env['ASSETS'] = ['cinder_logo_alpha.png', 'gaussianBlur_frag.glsl', 'passThru_vert.glsl']
-
-env = SConscript('../../scons/SConscript', exports = 'env')
-
-SConscript('../../../../scons/SConscript', exports = 'env')
