@@ -89,7 +89,7 @@ std::string syphonServer::getName()
 void syphonServer::publishScreen()
 {
 	ci::gl::TextureRef mTex =  ci::gl::Texture::create(ci::app::copyWindowSurface());
-	this->publishTexture(mTex);
+	this->publishTexture(mTex, false);
 }
 
 
