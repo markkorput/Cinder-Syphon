@@ -2,6 +2,6 @@
 <Workspace
    version = "1.0">
    <FileRef
-      location = "self:Syphon-BasicExample.xcodeproj">
+      location = "self:/Volumes/Projects/Frameworks/cinder_0.9.1_mac/blocks/Syphon/example-Basic/xcode/Syphon-BasicExample.xcodeproj">
    </FileRef>
 </Workspace>
