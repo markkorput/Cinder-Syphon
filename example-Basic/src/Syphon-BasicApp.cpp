@@ -91,13 +91,9 @@ void SyphonBasicApp::setup()
   mScreenSyphon.setName("Screen Output"); // set a name for each item to be published
   mTextureSyphon.setName("Texture Output");
   
-  mClientSyphon.setup();
-  
   // in order for this to work, you must run simple server which is a syphon test application
   // feel free to change the app and server name for your specific case
   mClientSyphon.set("", "Simple Server");
-  
-  mClientSyphon.bind();
 }
 
 void SyphonBasicApp::mouseDown( MouseEvent event )
@@ -123,7 +119,7 @@ void SyphonBasicApp::draw()
     gl::drawSolidRect( mLogo->getBounds() );
   }
   
-  mClientSyphon.draw(vec2(16.f, 64.f)); // draw our client image
+  gl::draw( mClientSyphon.getTexture(), vec2(16.f, 64.f) );
   
   mScreenSyphon.publishScreen(); // publish the screen's output
   mTextureSyphon.publishTexture(mLogo, false); // publish our texture without shader
