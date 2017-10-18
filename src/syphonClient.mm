@@ -29,38 +29,23 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "cinder/gl/gl.h"
-
-#include "syphonClient.h"
-
-#import <Syphon/Syphon.h>
+#import "cinder/gl/gl.h"
 #import "SyphonNameboundClient.h"
+#import "syphonClient.h"
 
 syphonClient::syphonClient()
 {
-  bSetup = false;
+  mClient = [[SyphonNameboundClient alloc] init];
 }
 
 syphonClient::~syphonClient()
 {
-  NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-  
-  [(SyphonNameboundClient*)mClient release];
+  [[(SyphonNameboundClient *)mClient client] stop];
+  if ( mTex ) {
+    unbind();
+  }
+  [(SyphonNameboundClient *)mClient release];
   mClient = nil;
-  
-  [pool drain];
-}
-
-void syphonClient::setup()
-{
-  // Need pool
-  NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-  
-  mClient = [[SyphonNameboundClient alloc] init];
-  
-  bSetup = true;
-  
-  [pool drain];
 }
 
 void syphonClient::set(syphonServerDescription _server){
@@ -68,129 +53,59 @@ void syphonClient::set(syphonServerDescription _server){
 }
 
 void syphonClient::set(std::string _serverName, std::string _appName){
-  if(bSetup)
-  {
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-    
-    NSString *nsAppName = [NSString stringWithCString:_appName.c_str() encoding:[NSString defaultCStringEncoding]];
-    NSString *nsServerName = [NSString stringWithCString:_serverName.c_str() encoding:[NSString defaultCStringEncoding]];
-    
-    [(SyphonNameboundClient*)mClient setAppName:nsAppName];
-    [(SyphonNameboundClient*)mClient setName:nsServerName];
-    
-    appName = _appName;
-    serverName = _serverName;
-    
-    [pool drain];
-  }
+  setServerName(_serverName);
+  setApplicationName(_appName);
 }
 
 void syphonClient::setApplicationName(std::string _appName)
 {
-  if(bSetup)
-  {
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-    
-    NSString *name = [NSString stringWithCString:appName.c_str() encoding:[NSString defaultCStringEncoding]];
-    
-    [(SyphonNameboundClient*)mClient setAppName:name];
-    
-    appName = _appName;
-    
-    [pool drain];
-  }
-  
+  NSString *name = [NSString stringWithUTF8String:_appName.c_str()];
+  [(SyphonNameboundClient *)mClient setAppName:name];
 }
+
 void syphonClient::setServerName(std::string _serverName)
 {
-  if(bSetup)
-  {
-    NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-    
-    NSString *name = [NSString stringWithCString:serverName.c_str() encoding:[NSString defaultCStringEncoding]];
-    
-    if([name length] == 0)
-      name = nil;
-    
-    [(SyphonNameboundClient*)mClient setName:name];
-    
-    serverName = _serverName;
-    
-    [pool drain];
+  NSString *name = [NSString stringWithUTF8String:_serverName.c_str()];
+  
+  if ([name length] == 0)
+    name = nil;
+  
+  [(SyphonNameboundClient*)mClient setName:name];
+}
+
+ci::gl::TextureRef& syphonClient::getTexture() {
+  if ( mTex ) {
+    unbind();
   }
+  bind();
+  return mTex;
+}
+
+std::string syphonClient::getApplicationName(){
+  return std::string( [(SyphonNameboundClient *)mClient appName].UTF8String );
+}
+
+std::string syphonClient::getServerName(){
+  return std::string( [(SyphonNameboundClient *)mClient name].UTF8String );
 }
 
 void syphonClient::bind()
 {
-  NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
+  [(SyphonNameboundClient*)mClient lockClient];
   
-  if(bSetup)
-  {
-    [(SyphonNameboundClient*)mClient lockClient];
-    SyphonClient *client = [(SyphonNameboundClient*)mClient client];
-    
-    latestImage = [client newFrameImageForContext:CGLGetCurrentContext()];
-    NSSize texSize = [(SyphonImage*)latestImage textureSize];
-    GLuint m_id = [(SyphonImage*)latestImage textureName];
-    
-    mTex = ci::gl::Texture::create(GL_TEXTURE_RECTANGLE_ARB, m_id,
-                                   texSize.width, texSize.height, true);
-    mTex->bind();
-  }
-  else
-    std::cout<<"syphonClient is not setup, or is not properly connected to server.  Cannot bind.\n";
+  auto client = [(SyphonNameboundClient*)mClient client];
   
-  [pool drain];
+  auto latestImage = [[client newFrameImageForContext:CGLGetCurrentContext()] autorelease];
+  auto texSize = [(SyphonImage *)latestImage textureSize];
+  auto m_id = [(SyphonImage *)latestImage textureName];
+  
+  mTex = ci::gl::Texture::create(GL_TEXTURE_RECTANGLE_ARB, m_id,
+                                 texSize.width, texSize.height, true);
+  mTex->bind();
 }
 
 void syphonClient::unbind()
 {
-  NSAutoreleasePool* pool = [[NSAutoreleasePool alloc] init];
-  
-  if(bSetup)
-  {
-    mTex->unbind();
-    
-    [(SyphonNameboundClient*)mClient unlockClient];
-    [(SyphonImage*)latestImage release];
-    latestImage = nil;
-  }
-  else
-    std::cout<<"syphonClient is not setup, or is not properly connected to server.  Cannot unbind.\n";
-  
-  [pool drain];
-}
-
-void syphonClient::draw(ci::vec2 origin, ci::vec2 drawSize){
-  draw(origin.x, origin.y, drawSize.x, drawSize.y);
-}
-
-void syphonClient::draw(ci::vec2 origin){
-  draw(origin.x, origin.y);
-}
-
-void syphonClient::draw(float x, float y, float w, float h)
-{
-  if(bSetup && mTex){
-    this->bind();
-    ci::gl::draw(mTex, ci::Rectf(x, y, x + w, y + h));
-    this->unbind();
-  }
-}
-
-void syphonClient::draw(float x, float y)
-{
-  if(bSetup && mTex){
-    this->bind();
-    ci::gl::draw(mTex,ci::vec2(x, y));
-    this->unbind();
-  }
-}
-
-std::string& syphonClient::getApplicationName(){
-  return appName;
-}
-
-std::string& syphonClient::getServerName(){
-  return serverName;
+  mTex->unbind();
+  [(SyphonNameboundClient*)mClient unlockClient];
 }
