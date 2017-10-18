@@ -34,40 +34,40 @@
 #include "syphonServerDirectory.h"
 
 class syphonClient {
-	public:
-	syphonClient();
-	~syphonClient();
-	
-	void setup();
-	
-    void set(syphonServerDescription _server);
-    void set(std::string _serverName, std::string _appName);
-    
-	void setApplicationName(std::string _appName);
-    void setServerName(std::string _serverName);
-	
-    void bind();
-    void unbind();
-    
-	void draw(ci::vec2 origin, ci::vec2 drawSize);
-	void draw(ci::vec2 origin);
-    void draw(float x, float y, float w, float h);
-    void draw(float x, float y);
-    //TODO: draw with bounds
-    
-    int getWidth();
-    int getHeight();
-    ci::ivec2 getSize();
-    
-    std::string& getApplicationName();
-    std::string& getServerName();
-    
+public:
+  syphonClient();
+  ~syphonClient();
+  
+  void setup();
+  
+  void set(syphonServerDescription _server);
+  void set(std::string _serverName, std::string _appName);
+  
+  void setApplicationName(std::string _appName);
+  void setServerName(std::string _serverName);
+  
+  void bind();
+  void unbind();
+  
+  void draw(ci::vec2 origin, ci::vec2 drawSize);
+  void draw(ci::vec2 origin);
+  void draw(float x, float y, float w, float h);
+  void draw(float x, float y);
+  //TODO: draw with bounds
+  
+  int getWidth();
+  int getHeight();
+  ci::ivec2 getSize();
+  
+  std::string& getApplicationName();
+  std::string& getServerName();
+  
 protected:
-
-	void* mClient;
-    void* latestImage;
-	ci::gl::TextureRef mTex;
-	int width, height;
-	bool bSetup;
-	std::string appName, serverName;
+  
+  void* mClient;
+  void* latestImage;
+  ci::gl::TextureRef mTex;
+  int width, height;
+  bool bSetup;
+  std::string appName, serverName;
 };
