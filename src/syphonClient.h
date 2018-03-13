@@ -1,22 +1,22 @@
 /*
  syphonClient.h
  Cinder Syphon Implementation
- 
+
  Created by astellato on 2/6/11
- 
+
  Copyright 2011 astellato, bangnoise (Tom Butterworth) & vade (Anton Marini).
  All rights reserved.
- 
+
  Redistribution and use in source and binary forms, with or without
  modification, are permitted provided that the following conditions are met:
- 
+
  * Redistributions of source code must retain the above copyright
  notice, this list of conditions and the following disclaimer.
- 
+
  * Redistributions in binary form must reproduce the above copyright
  notice, this list of conditions and the following disclaimer in the
  documentation and/or other materials provided with the distribution.
- 
+
  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,6 +29,8 @@
  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+#pragma once
+
 #include "cinder/app/App.h"
 #include "cinder/gl/Texture.h"
 #include "syphonServerDirectory.h"
@@ -36,27 +38,27 @@
 class syphonClient {
 public:
   syphonClient();
-  
+
   ~syphonClient();
-  
+
   void set(syphonServerDescription _server);
- 
+
   void set(std::string _serverName, std::string _appName);
-  
+
   void setApplicationName(std::string _appName);
-  
+
   void setServerName(std::string _serverName);
-  
+
   ci::gl::TextureRef& getTexture();
-  
+
   std::string getApplicationName();
-  
+
   std::string getServerName();
-  
+
 protected:
   void bind();
   void unbind();
-  
+
   void* mClient;
   ci::gl::TextureRef mTex;
 };
